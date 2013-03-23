@@ -422,7 +422,8 @@ class PwmanCli(cmd.Cmd):
             try:
                 node = self._db.getnodes([i])
                 self.print_node(node[0])
-                # when done with node earase it
+                # when done with node erase it
+                zerome(node[0]._password)
             except Exception, e:
                 self.error(e)
 
