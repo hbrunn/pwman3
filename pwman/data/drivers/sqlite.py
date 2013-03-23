@@ -94,7 +94,6 @@ class SQLiteDatabase(Database):
                 sql += "TAGS.DATA = ?"
                 params.append(t)
         try:
-            print params
             self._cur.execute(sql, params)
             tags = []
             row = self._cur.fetchone()
@@ -110,15 +109,22 @@ class SQLiteDatabase(Database):
             raise DatabaseException("SQLite: %s" % (e))
 
     def getnodes(self, ids):
+        """
+        object should always be: (ipwman.data.nodes
+        """
         nodes = []
         for i in ids:
             sql = "SELECT DATA FROM NODES WHERE ID = ?"
             try:
                 self._cur.execute(sql, [i])
-
                 row = self._cur.fetchone()
                 if row != None:
-                    node = cPickle.loads(str(row[0]))
+                    nodestring = str(row[0])
+                    if not nodestring.startswith("(ipwman.data.nodes"):
+                         raise DatabaseException(
+                "Tried to load foreign object from database," \
+                + " this looks fishy in here...")
+                    node = cPickle.loads(nodestring)
                     node.set_id(i)
                     nodes.append(node)
             except sqlite.DatabaseError, e:
@@ -139,17 +145,24 @@ class SQLiteDatabase(Database):
         self._commit()
 
     def addnodes(self, nodes):
+        """
+        This method injects the data as PWMAN object using cPickle. 
+        To make pwman more secure, either this method has to replaced.
+        Or whenever stuff is read from the database, there must be a 
+        security check that it contains the correct objects!
+        """
         for n in nodes:
             sql = "INSERT INTO NODES(DATA) VALUES(?)"
             if not isinstance(n, Node): raise DatabaseException(
                 "Tried to insert foreign object into database [%s]", n)
             value = cPickle.dumps(n)
+            print value
             try:
                 self._cur.execute(sql, [value])
             except sqlite.DatabaseError, e:
                 raise DatabaseException("SQLite: %s" % (e))
-            id = self._cur.lastrowid
-            n.set_id(id)
+            idx = self._cur.lastrowid
+            n.set_id(idx)
 
             self._setnodetags(n)
             self._commit()
@@ -183,7 +196,6 @@ class SQLiteDatabase(Database):
                     first = False
                 sql += ("SELECT NODE FROM LOOKUP LEFT JOIN TAGS ON TAG = TAGS.ID"
                         + " WHERE TAGS.DATA = ? ")
-
                 params.append(cPickle.dumps(t))
         try:
             self._cur.execute(sql, params)

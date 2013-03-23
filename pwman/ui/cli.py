@@ -29,6 +29,7 @@ import pwman.util.generator as generator
 from pwman.data.nodes import Node
 from pwman.data.tags import Tag
 from pwman.util.crypto import CryptoEngine
+from pwman.util.crypto import zerome
 #, CryptoBadKeyException, \
 #     CryptoPasswordMismatchException
 from pwman.util.callback import Callback
@@ -142,11 +143,9 @@ class PwmanCli(cmd.Cmd):
         if len(password) == 0:
             length = getinput("Password length (default 7): ", "7")
             length = int(length)
-        
             (password, dumpme) = generator.generate_password(length, length, \
                 True, leetify, numerics, special_signs)
             print "New password: %s" % (password)
-        
         return password
         
     def get_url(self, default=""):
@@ -423,6 +422,7 @@ class PwmanCli(cmd.Cmd):
             try:
                 node = self._db.getnodes([i])
                 self.print_node(node[0])
+                # when done with node earase it
             except Exception, e:
                 self.error(e)
 
@@ -495,6 +495,9 @@ class PwmanCli(cmd.Cmd):
             self.error(e)
 
     def do_forget(self, args):
+        """
+        earase key from memory to close the DB. 
+        """
         try:
             enc = CryptoEngine.get()
             enc.forget()
