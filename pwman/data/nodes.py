@@ -26,7 +26,6 @@ class Node:
     def __init__(self,username="",password="",url="",notes="",tags=[]):
         """Initialise everything to null."""
         self._id = 0;
-
         enc = CryptoEngine.get()
         self._username = enc.encrypt(username)
         self._password = enc.encrypt(password)
@@ -34,7 +33,19 @@ class Node:
         self._notes = enc.encrypt(notes)
         self._tags = []
         self.set_tags(tags)
-
+    
+    def dump_to_db(self):
+        dump = ""
+        dump += "username: "+self._username+" ##" 
+        dump += "password: "+self._password+" ##" 
+        dump += "url: "+self._url+" ##" 
+        dump += "notes: "+self._notes+" ##" 
+        dump += "tags: "+self._notes+" ##" 
+        for tag in self._tags:
+            dump += "tag: "+tag+" #+#" 
+        dump = [dump]
+        return dump
+        
     def get_tags(self):
         tags = []
         enc = CryptoEngine.get()
@@ -45,8 +56,8 @@ class Node:
     def set_tags(self, tags):
         self._tags = []
         enc = CryptoEngine.get()
-        for i in tags:
-            self._tags.append(enc.encrypt(i))
+        for tag in tags:
+            self._tags.append(tag._name)
 
     def get_id(self):
         return self._id

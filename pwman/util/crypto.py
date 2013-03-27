@@ -362,7 +362,7 @@ password")
         arrives already encrypted???
         """
         #plaintext = cPickle.dumps(obj)
-        plaintext = _TAG + plaintext
+        plaintext = _TAG + obj
         numblocks = (len(plaintext)/blocksize) + 1
         newdatasize = blocksize*numblocks
         return plaintext.ljust(newdatasize)
