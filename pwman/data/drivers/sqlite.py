@@ -132,8 +132,8 @@ class SQLiteDatabase(Database):
         return nodes
 
     def editnode(self, id, node):
-        if not isinstance(node, Node): raise DatabaseException(
-                "Tried to insert foreign object into database [%s]" % node)
+        #if not isinstance(node, Node): raise DatabaseException(
+        #        "Tried to insert foreign object into database [%s]" % node)
         try:
             sql = "UPDATE NODES SET DATA = ? WHERE ID = ?";
             self._cur.execute(sql, [cPickle.dumps(node), id])
@@ -150,15 +150,15 @@ class SQLiteDatabase(Database):
         To make pwman more secure, either this method has to replaced.
         Or whenever stuff is read from the database, there must be a 
         security check that it contains the correct objects!
+        Nodes passed to this methos are instances!
         """
         for n in nodes:
             sql = "INSERT INTO NODES(DATA) VALUES(?)"
-            if not isinstance(n, Node): raise DatabaseException(
-                "Tried to insert foreign object into database [%s]", n)
-            value = cPickle.dumps(n)
-            print value
+            #if not isinstance(n, Node): raise DatabaseException(
+            #    "Tried to insert foreign object into database [%s]", n)
+            value = n.dump_to_db()
             try:
-                self._cur.execute(sql, [value])
+                self._cur.execute(sql, value)
             except sqlite.DatabaseError, e:
                 raise DatabaseException("SQLite: %s" % (e))
             idx = self._cur.lastrowid
@@ -221,10 +221,9 @@ class SQLiteDatabase(Database):
         ids = []
         for t in tags:
             sql = "SELECT ID FROM TAGS WHERE DATA = ?"
-            if not isinstance(t, Tag): raise DatabaseException(
-                "Tried to insert foreign object into database [%s]", t)
+            #if not isinstance(t, Tag): raise DatabaseException(
+            #    "Tried to insert foreign object into database [%s]", t)
             data = cPickle.dumps(t)
-
             try:
                 self._cur.execute(sql, [data])
                 row = self._cur.fetchone()

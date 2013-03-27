@@ -358,9 +358,10 @@ password")
 
     def _preparedata(self, obj, blocksize):
         """
-        prepare data before encrypting
+        prepare data before encrypting?
+        arrives already encrypted???
         """
-        plaintext = cPickle.dumps(obj)
+        #plaintext = cPickle.dumps(obj)
         plaintext = _TAG + plaintext
         numblocks = (len(plaintext)/blocksize) + 1
         newdatasize = blocksize*numblocks
@@ -384,12 +385,14 @@ class DummyCryptoEngine(CryptoEngine):
         pass
 
     def encrypt(self, obj):
-        """Return the object pickled."""
-        return cPickle.dumps(obj)
+        """Return the object  sys.getsizeof(newdatasize)pickled."""
+        #return cPickle.dumps(obj)
+        return obj
 
     def decrypt(self, ciphertext):
         """Unpickle the object."""
-        return cPickle.loads(str(ciphertext))
+        #return cPickle.loads(str(ciphertext))
+        return str(ciphertext)
 
     def changepassword(self):
         return ''
