@@ -48,14 +48,12 @@ class Node:
         
     def get_tags(self):
         tags = []
-        enc = CryptoEngine.get()
-        for i in self._tags:
-            tags.append(enc.decrypt(i))
+        for tag in self._tags:
+            tags.append(tag)
         return tags
 
     def set_tags(self, tags):
         self._tags = []
-        enc = CryptoEngine.get()
         for tag in tags:
             self._tags.append(tag._name)
 
