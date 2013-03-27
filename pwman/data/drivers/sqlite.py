@@ -163,7 +163,6 @@ class SQLiteDatabase(Database):
                 raise DatabaseException("SQLite: %s" % (e))
             idx = self._cur.lastrowid
             n.set_id(idx)
-
             self._setnodetags(n)
             self._commit()
 
@@ -216,22 +215,22 @@ class SQLiteDatabase(Database):
             self._con.rollback()
             raise DatabaseException(
                 "SQLite: Error commiting data to db [%s]" % (e))
-
+        
     def _tagids(self, tags):
         ids = []
-        for t in tags:
+        for tag in tags:
             sql = "SELECT ID FROM TAGS WHERE DATA = ?"
             #if not isinstance(t, Tag): raise DatabaseException(
             #    "Tried to insert foreign object into database [%s]", t)
-            data = cPickle.dumps(t)
+            #data = cPickle.dumps(t) # tag is data
             try:
-                self._cur.execute(sql, [data])
+                self._cur.execute(sql, [tag])
                 row = self._cur.fetchone()
                 if (row != None):
                     ids.append(row[0])
                 else:
                     sql = "INSERT INTO TAGS(DATA) VALUES(?)"
-                    self._cur.execute(sql, [data])
+                    self._cur.execute(sql, [tag])
                     ids.append(self._cur.lastrowid)
             except sqlite.DatabaseError, e:
                 raise DatabaseException("SQLite: %s" % (e))
@@ -241,7 +240,6 @@ class SQLiteDatabase(Database):
         try:
             sql = "DELETE FROM LOOKUP WHERE NODE = ?"
             self._cur.execute(sql, [node.get_id()])
-
         except sqlite.DatabaseError, e:
             raise DatabaseException("SQLite: %s" % (e))
         self._commit()
@@ -249,7 +247,6 @@ class SQLiteDatabase(Database):
     def _setnodetags(self, node):
         self._deletenodetags(node)
         ids = self._tagids(node.get_tags())
-
         for i in ids:
             sql = "INSERT OR REPLACE INTO LOOKUP VALUES(?, ?)"
             params = [node.get_id(), i]
@@ -324,3 +321,4 @@ class SQLiteDatabase(Database):
             return None
         else:
             return keyrow[0]
+        print "succeded"
