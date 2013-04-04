@@ -110,14 +110,12 @@ class SQLiteDatabase(Database):
             raise DatabaseException("SQLite: %s" % (e))
 
     def parse_node_string(self, string):
-        print "inside", string
         nodestring = string.split("##")
         keyvals = {}
-        print nodestring
         for pair in nodestring[:-1]:
             key, val = pair.split(":")
             keyvals[key.lstrip('##')] = val
-        print keyvals
+        return keyvals
 
     def getnodes(self, ids):
         """
@@ -129,7 +127,6 @@ class SQLiteDatabase(Database):
             try:
                 self._cur.execute(sql, [i])
                 row = self._cur.fetchone()
-                print row
                 if row is not None:
                     nodestring = str(row[0])
                     #if not nodestring.startswith("(ipwman.data.nodes"):
@@ -137,14 +134,10 @@ class SQLiteDatabase(Database):
                 #"Tried to load foreign object from database," \
                 #+ " this looks fishy in here...")
                     #print nodestring
-                    print nodestring.split("\n")
-                    print type(nodestring)
                     nodeargs = self.parse_node_string(nodestring)
-                    print type(nodeargs)
-
-                    raw_input()
                     #node = cPickle.loads(nodestring)
                     node = Node(**nodeargs)
+                    print "node"
                     node.set_id(i)
                     nodes.append(node)
             except sqlite.DatabaseError, e:
