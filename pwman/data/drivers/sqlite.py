@@ -38,6 +38,7 @@ import pwman.util.config as config
 
 import cPickle
 
+
 class SQLiteDatabase(Database):
     """SQLite Database implementation"""
 
@@ -70,19 +71,19 @@ class SQLiteDatabase(Database):
             sql = "SELECT DATA FROM TAGS ORDER BY DATA ASC"
         else:
             sql = ("SELECT TAGS.DATA FROM LOOKUP"
-                   +" INNER JOIN TAGS ON LOOKUP.TAG = TAGS.ID"
-                   +" WHERE NODE IN (")
+                   + " INNER JOIN TAGS ON LOOKUP.TAG = TAGS.ID"
+                   + " WHERE NODE IN (")
             first = True
             # if using the command filter, the code crashes ...
-            # 
+            #
             for t in self._filtertags:
                 if not first:
                     sql += " INTERSECT "
                 else:
                     first = False
 
-                sql += ("SELECT NODE FROM LOOKUP LEFT JOIN TAGS ON TAG = TAGS.ID "
-                        + " WHERE TAGS.DATA = ?")
+                sql += ("SELECT NODE FROM LOOKUP LEFT JOIN TAGS ON TAG = "
+                        + " TAGS.ID WHERE TAGS.DATA = ?")
                 params.append(cPickle.dumps(t))
             sql += ") EXCEPT SELECT DATA FROM TAGS WHERE "
             first = True
@@ -97,7 +98,7 @@ class SQLiteDatabase(Database):
             self._cur.execute(sql, params)
             tags = []
             row = self._cur.fetchone()
-            while (row != None):
+            while row is not None:
                 tagstring = str(row[0])
                 m = re.search('S\"S\'(.+?)\'', tagstring)
                 if m:
@@ -107,6 +108,16 @@ class SQLiteDatabase(Database):
             return tags
         except sqlite.DatabaseError, e:
             raise DatabaseException("SQLite: %s" % (e))
+
+    def parse_node_string(self, string):
+        print "inside", string
+        nodestring = string.split("##")
+        keyvals = {}
+        print nodestring
+        for pair in nodestring[:-1]:
+            key, val = pair.split(":")
+            keyvals[key.lstrip('##')] = val
+        print keyvals
 
     def getnodes(self, ids):
         """
@@ -118,13 +129,22 @@ class SQLiteDatabase(Database):
             try:
                 self._cur.execute(sql, [i])
                 row = self._cur.fetchone()
-                if row != None:
+                print row
+                if row is not None:
                     nodestring = str(row[0])
-                    if not nodestring.startswith("(ipwman.data.nodes"):
-                         raise DatabaseException(
-                "Tried to load foreign object from database," \
-                + " this looks fishy in here...")
-                    node = cPickle.loads(nodestring)
+                    #if not nodestring.startswith("(ipwman.data.nodes"):
+                    #     raise DatabaseException(
+                #"Tried to load foreign object from database," \
+                #+ " this looks fishy in here...")
+                    #print nodestring
+                    print nodestring.split("\n")
+                    print type(nodestring)
+                    nodeargs = self.parse_node_string(nodestring)
+                    print type(nodeargs)
+
+                    raw_input()
+                    #node = cPickle.loads(nodestring)
+                    node = Node(**nodeargs)
                     node.set_id(i)
                     nodes.append(node)
             except sqlite.DatabaseError, e:
@@ -135,7 +155,7 @@ class SQLiteDatabase(Database):
         #if not isinstance(node, Node): raise DatabaseException(
         #        "Tried to insert foreign object into database [%s]" % node)
         try:
-            sql = "UPDATE NODES SET DATA = ? WHERE ID = ?";
+            sql = "UPDATE NODES SET DATA = ? WHERE ID = ?"
             self._cur.execute(sql, [cPickle.dumps(node), id])
 
         except sqlite.DatabaseError, e:
@@ -146,9 +166,9 @@ class SQLiteDatabase(Database):
 
     def addnodes(self, nodes):
         """
-        This method injects the data as PWMAN object using cPickle. 
+        This method injects the data as PWMAN object using cPickle.
         To make pwman more secure, either this method has to replaced.
-        Or whenever stuff is read from the database, there must be a 
+        Or whenever stuff is read from the database, there must be a
         security check that it contains the correct objects!
         Nodes passed to this methos are instances!
         """
@@ -168,10 +188,10 @@ class SQLiteDatabase(Database):
 
     def removenodes(self, nodes):
         for n in nodes:
-            if not isinstance(n, Node): raise DatabaseException(
-                "Tried to delete foreign object from database [%s]", n)
+            #if not isinstance(n, Node): raise DatabaseException(
+            #    "Tried to delete foreign object from database [%s]", n)
             try:
-                sql = "DELETE FROM NODES WHERE ID = ?";
+                sql = "DELETE FROM NODES WHERE ID = ?"
                 self._cur.execute(sql, [n.get_id()])
 
             except sqlite.DatabaseError, e:
@@ -193,15 +213,15 @@ class SQLiteDatabase(Database):
                     sql += " INTERSECT "
                 else:
                     first = False
-                sql += ("SELECT NODE FROM LOOKUP LEFT JOIN TAGS ON TAG = TAGS.ID"
-                        + " WHERE TAGS.DATA = ? ")
+                sql += ("SELECT NODE FROM LOOKUP LEFT JOIN TAGS ON TAG = "
+                        " TAGS.ID WHERE TAGS.DATA = ? ")
                 params.append(cPickle.dumps(t))
         try:
             self._cur.execute(sql, params)
 
             ids = []
             row = self._cur.fetchone()
-            while (row != None):
+            while row is not None:
                 ids.append(row[0])
                 row = self._cur.fetchone()
             return ids
@@ -215,7 +235,7 @@ class SQLiteDatabase(Database):
             self._con.rollback()
             raise DatabaseException(
                 "SQLite: Error commiting data to db [%s]" % (e))
-        
+
     def _tagids(self, tags):
         ids = []
         for tag in tags:
@@ -226,7 +246,7 @@ class SQLiteDatabase(Database):
             try:
                 self._cur.execute(sql, [tag])
                 row = self._cur.fetchone()
-                if (row != None):
+                if (row is not None):
                     ids.append(row[0])
                 else:
                     sql = "INSERT INTO TAGS(DATA) VALUES(?)"
@@ -259,7 +279,8 @@ class SQLiteDatabase(Database):
 
     def _checktags(self):
         try:
-            sql = "DELETE FROM TAGS WHERE ID NOT IN (SELECT TAG FROM LOOKUP GROUP BY TAG)"
+            sql = "DELETE FROM TAGS WHERE ID NOT IN (SELECT TAG FROM"
+            + " LOOKUP GROUP BY TAG)"
             self._cur.execute(sql)
         except sqlite.DatabaseError, e:
             raise DatabaseException("SQLite: %s" % (e))
@@ -268,13 +289,12 @@ class SQLiteDatabase(Database):
     def _checktables(self):
         """ Check if the Pwman tables exist """
         self._cur.execute("PRAGMA TABLE_INFO(NODES)")
-        if (self._cur.fetchone() == None):
+        if (self._cur.fetchone() is None):
             # table doesn't exist, create it
             # SQLite does have constraints implemented at the moment
             # so datatype will just be a string
-            self._cur.execute("CREATE TABLE NODES"
-                             + "(ID INTEGER PRIMARY KEY AUTOINCREMENT,"
-                             + "DATA BLOB NOT NULL)")
+            self._cur.execute("CREATE TABLE NODES (ID INTEGER PRIMARY KEY"
+                              + " AUTOINCREMENT,DATA BLOB NOT NULL)")
             self._cur.execute("CREATE TABLE TAGS"
                               + "(ID INTEGER PRIMARY KEY AUTOINCREMENT,"
                               + "DATA BLOB NOT NULL UNIQUE)")
@@ -283,21 +303,21 @@ class SQLiteDatabase(Database):
                               + " PRIMARY KEY(NODE, TAG))")
 
             self._cur.execute("CREATE TABLE KEY"
-                              + "(THEKEY TEXT NOT NULL DEFAULT '')");
-            self._cur.execute("INSERT INTO KEY VALUES('')");
+                              + "(THEKEY TEXT NOT NULL DEFAULT '')")
+            self._cur.execute("INSERT INTO KEY VALUES('')")
             try:
                 self._con.commit()
-            except DatabaseError, e:
+            except DatabaseException, e:
                 self._con.rollback()
                 raise e
 
     def savekey(self, key):
         """
-        This function is saving the key to table KEY. 
+        This function is saving the key to table KEY.
         The key already arrives as an encrypted string.
-        It is the same self._keycrypted from 
-        crypto py (check with id(self._keycrypted) and 
-        id(key) here. 
+        It is the same self._keycrypted from
+        crypto py (check with id(self._keycrypted) and
+        id(key) here.
         """
         sql = "UPDATE KEY SET THEKEY = ?"
         values = [key]
@@ -309,13 +329,12 @@ class SQLiteDatabase(Database):
             raise DatabaseException(
                 "SQLite: Error saving key [%s]" % (e))
 
-
     def loadkey(self):
         """
         fetch the key to database. the key is also stored
         encrypted.
         """
-        self._cur.execute("SELECT THEKEY FROM KEY");
+        self._cur.execute("SELECT THEKEY FROM KEY")
         keyrow = self._cur.fetchone()
         if (keyrow[0] == ''):
             return None
