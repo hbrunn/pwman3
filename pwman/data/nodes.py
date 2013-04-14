@@ -1,4 +1,5 @@
 #============================================================================
+
 # This file is part of Pwman3.
 #
 # Pwman3 is free software; you can redistribute it and/or modify
@@ -56,6 +57,12 @@ class Node:
         return tags
 
     def set_tags(self, tags):
+        """
+        this method expects a list of tag instances.
+        hence feed it with them. TODO: fix the method parse_node_string in
+        SQLiteDatabase.
+        The method should return a dictionary, but a also
+        appropriate Tags instances..."""
         self._tags = []
         for tag in tags:
             self._tags.append(tag._name)

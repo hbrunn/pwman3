@@ -1,4 +1,5 @@
 #============================================================================
+
 # This file is part of Pwman3.
 #
 # Pwman3 is free software; you can redistribute it and/or modify
@@ -211,7 +212,6 @@ class SQLiteDatabase(Database):
                 params.append(cPickle.dumps(t))
         try:
             self._cur.execute(sql, params)
-
             ids = []
             row = self._cur.fetchone()
             while row is not None:
