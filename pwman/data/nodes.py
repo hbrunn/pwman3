@@ -1,15 +1,15 @@
 #============================================================================
 # This file is part of Pwman3.
-# 
+#
 # Pwman3 is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License, version 2
-# as published by the Free Software Foundation; 
-# 
+# as published by the Free Software Foundation;
+#
 # Pwman3 is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Pwman3; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -22,30 +22,33 @@
 
 from pwman.util.crypto import CryptoEngine
 
+
 class Node:
-    def __init__(self,username="",password="",url="",notes="",tags=[]):
+    def __init__(self, username="", password="", url="", notes="", tags=[]):
         """Initialise everything to null."""
-        self._id = 0;
+        self._id = 0
         enc = CryptoEngine.get()
         self._username = enc.encrypt(username)
+        print self._username
+        raw_input()
         self._password = enc.encrypt(password)
         self._url = enc.encrypt(url)
         self._notes = enc.encrypt(notes)
         self._tags = []
         self.set_tags(tags)
-    
+
     def dump_to_db(self):
         dump = ""
-        dump += "username: "+self._username+" ##" 
-        dump += "password: "+self._password+" ##" 
-        dump += "url: "+self._url+" ##" 
-        dump += "notes: "+self._notes+" ##" 
-        dump += "tags: "+self._notes+" ##" 
+        dump += "username:"+self._username+"##"
+        dump += "password:"+self._password+"##"
+        dump += "url:"+self._url+"##"
+        dump += "notes:"+self._notes+"##"
+        dump += "tags:"+self._notes+"##"
         for tag in self._tags:
-            dump += "tag: "+tag+" #+#" 
+            dump += "tag:"+tag+" #+#"
         dump = [dump]
         return dump
-        
+
     def get_tags(self):
         tags = []
         for tag in self._tags:
@@ -62,7 +65,7 @@ class Node:
 
     def set_id(self, id):
         self._id = id
-        
+
     def get_username(self):
         """Return the username."""
         enc = CryptoEngine.get()
@@ -102,4 +105,3 @@ class Node:
         """Set the Notes."""
         enc = CryptoEngine.get()
         self._notes = enc.encrypt(notes)
-
