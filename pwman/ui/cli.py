@@ -129,7 +129,7 @@ class PwmanCli(cmd.Cmd):
         numerics -> numerics
         leetify -> symbols
         special_chars -> special_signs
-        """        
+        """
         if argsgiven == 1:
             length = getinput("Password length (default 7): ", "7")
             length = int(length)
@@ -147,7 +147,7 @@ class PwmanCli(cmd.Cmd):
                 True, leetify, numerics, special_signs)
             print "New password: %s" % (password)
         return password
-        
+
     def get_url(self, default=""):
         return getinput("Url: ", default)
 
@@ -199,7 +199,8 @@ class PwmanCli(cmd.Cmd):
                                     node.get_notes())
         print typeset("Tags: ", ANSI.Red),
         for t in node.get_tags():
-            print " %s " % t.get_name(),
+            #print " %s " % t.get_name(),
+            print " %s " % t,
         print
 
         def heardEnter():
@@ -227,7 +228,7 @@ class PwmanCli(cmd.Cmd):
                     break
                 time.sleep(period)
             self.do_cls('')
-        
+
         flushtimeout = int(config.get_value("Global", "cls_timeout"))
         if flushtimeout > 0:
             if sys.platform != 'win32':
@@ -398,8 +399,8 @@ class PwmanCli(cmd.Cmd):
             else:
                 numerics = config.get_value("Generator", "numerics").lower() == 'true'
                 # TODO: allow custom leetifying through the config
-                leetify = config.get_value("Generator", "leetify").lower() == 'true' 
-                special_chars = config.get_value("Generator", "special_chars").lower() == 'true' 
+                leetify = config.get_value("Generator", "leetify").lower() == 'true'
+                special_chars = config.get_value("Generator", "special_chars").lower() == 'true'
                 password = self.get_password(0,
                                              numerics=numerics,
                                              symbols=leetify,
@@ -497,7 +498,7 @@ class PwmanCli(cmd.Cmd):
 
     def do_forget(self, args):
         """
-        earase key from memory to close the DB. 
+        earase key from memory to close the DB.
         """
         try:
             enc = CryptoEngine.get()
@@ -662,8 +663,8 @@ the url must contain http:// or https://."
 
     def help_new(self):
         self.usage("new")
-        print """Creates a new node., 
-You can override default config settings the following way:      
+        print """Creates a new node.,
+You can override default config settings the following way:
 pwman> n {'leetify':False, 'numerics':True}"""
 
     def help_rm(self):
@@ -844,7 +845,7 @@ def getinput(question, default="", completer=None, width=_defaultwidth):
     if (not _readline_available):
         return raw_input(question.ljust(width))
     else:
-        def defaulter(): 
+        def defaulter():
             """define default behavior startup"""
             readline.insert_text(default)
 
@@ -972,15 +973,15 @@ class CliMenu(object):
                 # substract 1 because array subscripts start at 0
                 selection = int(option) - 1
                 print "selection, ", selection
-                # new value is created by calling the editor with the 
-                # previous value as a parameter 
+                # new value is created by calling the editor with the
+                # previous value as a parameter
                 # TODO: enable overriding password policy as if new node
                 # is created.
                 if selection == 1: # for password
                     value = self.items[selection].editor(0)
                 else:
                     value = self.items[selection].editor(self.items[selection].getter())
-                
+
                 self.items[selection].setter(value)
             except (ValueError, IndexError):
                 if (option.upper() == 'X'):

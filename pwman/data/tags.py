@@ -1,15 +1,16 @@
 #============================================================================
+
 # This file is part of Pwman3.
-# 
+#
 # Pwman3 is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License, version 2
-# as published by the Free Software Foundation; 
-# 
+# as published by the Free Software Foundation;
+#
 # Pwman3 is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Pwman3; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -23,7 +24,6 @@
 from pwman.util.crypto import CryptoEngine
 
 class Tag:
-
     def __init__(self, name):
         self.set_name(name)
 
@@ -32,7 +32,7 @@ class Tag:
             return True
         else:
             return False
-        
+
     def get_name(self):
         enc = CryptoEngine.get()
         return enc.decrypt(self._name)
@@ -40,6 +40,6 @@ class Tag:
     def set_name(self, name):
         enc = CryptoEngine.get()
         self._name = enc.encrypt(name)
-                
+
     def __str__(self):
         return self.get_name()

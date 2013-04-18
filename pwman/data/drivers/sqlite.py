@@ -1,5 +1,6 @@
 #============================================================================
 
+
 # This file is part of Pwman3.
 #
 # Pwman3 is free software; you can redistribute it and/or modify
@@ -116,7 +117,13 @@ class SQLiteDatabase(Database):
         for pair in nodestring[:-1]:
             key, val = pair.split(":")
             keyvals[key.lstrip('##')] = val
-        return keyvals
+        tags = nodestring[-1]
+        tags = tags.lstrip("tags:")
+        tags = tags.split("tag:")
+        taginsts = []
+        for tag in tags:
+           taginsts.append(Tag(tag.rstrip("**endtag**")))
+        return keyvals, taginsts
 
     def getnodes(self, ids):
         """
@@ -135,10 +142,10 @@ class SQLiteDatabase(Database):
                 #"Tried to load foreign object from database," \
                 #+ " this looks fishy in here...")
                     #print nodestring
-                    nodeargs = self.parse_node_string(nodestring)
+                    nodeargs, tags = self.parse_node_string(nodestring)
                     #node = cPickle.loads(nodestring)
                     node = Node(**nodeargs)
-                    print "node"
+                    node.set_tags(tags)
                     node.set_id(i)
                     nodes.append(node)
             except sqlite.DatabaseError, e:

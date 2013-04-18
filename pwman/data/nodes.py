@@ -1,5 +1,6 @@
 #============================================================================
 
+
 # This file is part of Pwman3.
 #
 # Pwman3 is free software; you can redistribute it and/or modify
@@ -22,7 +23,7 @@
 #============================================================================
 
 from pwman.util.crypto import CryptoEngine
-
+from pwman.data.tags import Tag
 
 class Node:
     def __init__(self, username="", password="", url="", notes="", tags=[]):
@@ -30,8 +31,6 @@ class Node:
         self._id = 0
         enc = CryptoEngine.get()
         self._username = enc.encrypt(username)
-        print self._username
-        raw_input()
         self._password = enc.encrypt(password)
         self._url = enc.encrypt(url)
         self._notes = enc.encrypt(notes)
@@ -44,9 +43,11 @@ class Node:
         dump += "password:"+self._password+"##"
         dump += "url:"+self._url+"##"
         dump += "notes:"+self._notes+"##"
-        dump += "tags:"+self._notes+"##"
+        dump += "tags:"
+        tagsloc=""
         for tag in self._tags:
-            dump += "tag:"+tag+" #+#"
+            tagsloc += "tag:"+tag+"**endtag**"
+        dump += tagsloc
         dump = [dump]
         return dump
 
@@ -59,10 +60,11 @@ class Node:
     def set_tags(self, tags):
         """
         this method expects a list of tag instances.
-        hence feed it with them. TODO: fix the method parse_node_string in
-        SQLiteDatabase.
-        The method should return a dictionary, but a also
-        appropriate Tags instances..."""
+        hence feed it with them.
+
+        fixed! the method parse_node_string in
+        SQLiteDatabase returns a dictionary,
+        but a also, Tags instances..."""
         self._tags = []
         for tag in tags:
             self._tags.append(tag._name)
