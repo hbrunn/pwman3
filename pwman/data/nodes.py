@@ -28,6 +28,7 @@ from pwman.data.tags import Tag
 class Node:
     def __init__(self, username="", password="", url="", notes="", tags=[]):
         """Initialise everything to null."""
+        import ipdb; ipdb.set_trace()
         self._id = 0
         enc = CryptoEngine.get()
         self._username = enc.encrypt(username)
@@ -66,8 +67,10 @@ class Node:
         SQLiteDatabase returns a dictionary,
         but a also, Tags instances..."""
         self._tags = []
+        import pdb; pdb.set_trace()
         for tag in tags:
-            self._tags.append(tag._name)
+            self._tags.append(tag)
+#            self._tags.append(tag._name)
 
     def get_id(self):
         return self._id

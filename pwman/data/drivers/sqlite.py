@@ -38,7 +38,7 @@ else:
 
 import pwman.util.config as config
 
-import cPickle
+#import cPickle
 
 
 class SQLiteDatabase(Database):
@@ -86,6 +86,7 @@ class SQLiteDatabase(Database):
 
                 sql += ("SELECT NODE FROM LOOKUP LEFT JOIN TAGS ON TAG = "
                         + " TAGS.ID WHERE TAGS.DATA = ?")
+                import ipdb; ipdb.set_trace()
                 params.append(cPickle.dumps(t))
             sql += ") EXCEPT SELECT DATA FROM TAGS WHERE "
             first = True
@@ -122,7 +123,13 @@ class SQLiteDatabase(Database):
         tags = tags.split("tag:")
         taginsts = []
         for tag in tags:
-           taginsts.append(Tag(tag.rstrip("**endtag**")))
+           _Tag = tag.rstrip("**endtag**")
+           Tag = (_Tag)
+           print "created tag"
+           taginsts.append(Tag)
+           #taginsts.append(Tag(tag.rstrip("**endtag**")))
+        #import ipdb; ipdb.set_trace()
+        print "d"
         return keyvals, taginsts
 
     def getnodes(self, ids):
@@ -131,10 +138,11 @@ class SQLiteDatabase(Database):
         """
         nodes = []
         for i in ids:
-            sql = "SELECT DATA FROM NODES WHERE ID = ?"
-            try:
+                sql = "SELECT DATA FROM NODES WHERE ID = ?"
+            #try:
                 self._cur.execute(sql, [i])
                 row = self._cur.fetchone()
+                print "fg"
                 if row is not None:
                     nodestring = str(row[0])
                     #if not nodestring.startswith("(ipwman.data.nodes"):
@@ -142,14 +150,19 @@ class SQLiteDatabase(Database):
                 #"Tried to load foreign object from database," \
                 #+ " this looks fishy in here...")
                     #print nodestring
+
                     nodeargs, tags = self.parse_node_string(nodestring)
+                    print "fg2"
                     #node = cPickle.loads(nodestring)
+                    #import ipdb; ipdb.set_trace()
+
                     node = Node(**nodeargs)
                     node.set_tags(tags)
                     node.set_id(i)
                     nodes.append(node)
-            except sqlite.DatabaseError, e:
-                raise DatabaseException("SQLite: %s" % (e))
+                    print "n"
+            #except sqlite.DatabaseError, e:
+            #   raise DatabaseException("SQLite: %s" % (e))
         return nodes
 
     def editnode(self, id, node):

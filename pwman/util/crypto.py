@@ -382,8 +382,8 @@ password")
             plaintext = plaintext[len(_TAG):]
         else:
             raise CryptoBadKeyException("Error decrypting, bad key")
-        return cPickle.loads(plaintext)
-
+        return plaintext
+        #return cPickle.loads(plaintext)
 
 class DummyCryptoEngine(CryptoEngine):
     """Dummy CryptoEngine used when database doesn't ask for encryption.

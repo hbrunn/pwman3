@@ -1,5 +1,6 @@
 #============================================================================
 
+
 # This file is part of Pwman3.
 #
 # Pwman3 is free software; you can redistribute it and/or modify
@@ -24,6 +25,7 @@
 from pwman.util.crypto import CryptoEngine
 
 class Tag:
+
     def __init__(self, name):
         self.set_name(name)
 
@@ -40,6 +42,8 @@ class Tag:
     def set_name(self, name):
         enc = CryptoEngine.get()
         self._name = enc.encrypt(name)
+        print self._name
+        import ipdb; ipdb.set_trace()
 
     def __str__(self):
         return self.get_name()
