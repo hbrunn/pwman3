@@ -23,31 +23,30 @@
 #============================================================================
 
 from pwman.util.crypto import CryptoEngine
-from pwman.data.tags import Tag
+
 
 class Node:
     def __init__(self, username="", password="", url="", notes="", tags=[]):
         """Initialise everything to null."""
-        import ipdb; ipdb.set_trace()
         self._id = 0
-        enc = CryptoEngine.get()
-        self._username = enc.encrypt(username)
-        self._password = enc.encrypt(password)
-        self._url = enc.encrypt(url)
-        self._notes = enc.encrypt(notes)
+        self._username = username
+        self._password = password
+        self._url = url
+        self._notes = notes
         self._tags = []
         self.set_tags(tags)
 
     def dump_to_db(self):
+        enc = CryptoEngine.get()
         dump = ""
-        dump += "username:"+self._username+"##"
-        dump += "password:"+self._password+"##"
-        dump += "url:"+self._url+"##"
-        dump += "notes:"+self._notes+"##"
+        dump += "username:"+enc.encrypt(self._username)+"##"
+        dump += "password:"+enc.encrypt(self._password)+"##"
+        dump += "url:"+enc.encrypt(self._url)+"##"
+        dump += "notes:"+enc.encrypt(self._notes)+"##"
         dump += "tags:"
         tagsloc=""
         for tag in self._tags:
-            tagsloc += "tag:"+tag+"**endtag**"
+            tagsloc += "tag:"+tag.get_name()+"**endtag**"
         dump += tagsloc
         dump = [dump]
         return dump
@@ -67,7 +66,6 @@ class Node:
         SQLiteDatabase returns a dictionary,
         but a also, Tags instances..."""
         self._tags = []
-        import pdb; pdb.set_trace()
         for tag in tags:
             self._tags.append(tag)
 #            self._tags.append(tag._name)

@@ -256,14 +256,17 @@ class SQLiteDatabase(Database):
             #if not isinstance(t, Tag): raise DatabaseException(
             #    "Tried to insert foreign object into database [%s]", t)
             #data = cPickle.dumps(t) # tag is data
+            import pdb; pdb.set_trace()
             try:
-                self._cur.execute(sql, [tag])
+                #self._cur.execute(sql, [tag])
+                self._cur.execute(sql, [tag.get_name()])
                 row = self._cur.fetchone()
                 if (row is not None):
                     ids.append(row[0])
                 else:
                     sql = "INSERT INTO TAGS(DATA) VALUES(?)"
-                    self._cur.execute(sql, [tag])
+                    #self._cur.execute(sql, [tag])
+                    self._cur.execute(sql, [tag.get_name()])
                     ids.append(self._cur.lastrowid)
             except sqlite.DatabaseError, e:
                 raise DatabaseException("SQLite: %s" % (e))
