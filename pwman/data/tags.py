@@ -42,8 +42,6 @@ class Tag:
     def set_name(self, name):
         enc = CryptoEngine.get()
         self._name = enc.encrypt(name)
-        print self._name
-        import ipdb; ipdb.set_trace()
 
     def __str__(self):
         return self.get_name()

@@ -188,7 +188,6 @@ class PwmanCli(cmd.Cmd):
         return tags
 
     def print_node(self, node):
-        import ipdb; ipdb.set_trace()
         width = str(_defaultwidth)
         print "Node %d." % (node.get_id())
         print ("%"+width+"s %s") % (typeset("Username:", ANSI.Red),
@@ -463,7 +462,6 @@ class PwmanCli(cmd.Cmd):
             else:
                 rows, cols = 18, 80 # fix this !
             nodeids = self._db.listnodes()
-            import ipdb; ipdb.set_trace()
             nodes = self._db.getnodes(nodeids)
             cols -= 8
             i = 0
@@ -487,7 +485,6 @@ class PwmanCli(cmd.Cmd):
                     name = name[:name_len-3] + "..."
                 if len(tagstring) > tagstring_len:
                     tagstring = tagstring[:tagstring_len-3] + "..."
-
                 fmt = "%%5d. %%-%ds %%-%ds" % (name_len, tagstring_len)
                 print typeset(fmt % (n.get_id(), name, tagstring),
                               ANSI.Yellow, False)

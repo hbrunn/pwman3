@@ -1,4 +1,5 @@
 #============================================================================
+
 # This file is part of Pwman3.
 #
 # Pwman3 is free software; you can redistribute it and/or modify
@@ -55,7 +56,6 @@ from Crypto.Random import OSRNG
 
 from pwman.util.callback import Callback
 import pwman.util.config as config
-import cPickle
 import time
 import sys
 import ctypes

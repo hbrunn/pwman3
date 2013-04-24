@@ -86,8 +86,7 @@ class SQLiteDatabase(Database):
 
                 sql += ("SELECT NODE FROM LOOKUP LEFT JOIN TAGS ON TAG = "
                         + " TAGS.ID WHERE TAGS.DATA = ?")
-                import ipdb; ipdb.set_trace()
-                params.append(cPickle.dumps(t))
+                params.append(t.get_name())
             sql += ") EXCEPT SELECT DATA FROM TAGS WHERE "
             first = True
             for t in self._filtertags:
@@ -125,11 +124,7 @@ class SQLiteDatabase(Database):
         for tag in tags:
            _Tag = tag.rstrip("**endtag**")
            Tag = (_Tag)
-           print "created tag"
            taginsts.append(Tag)
-           #taginsts.append(Tag(tag.rstrip("**endtag**")))
-        #import ipdb; ipdb.set_trace()
-        print "d"
         return keyvals, taginsts
 
     def getnodes(self, ids):
@@ -142,30 +137,25 @@ class SQLiteDatabase(Database):
             #try:
                 self._cur.execute(sql, [i])
                 row = self._cur.fetchone()
-                print "fg"
                 if row is not None:
                     nodestring = str(row[0])
                     #if not nodestring.startswith("(ipwman.data.nodes"):
                     #     raise DatabaseException(
                 #"Tried to load foreign object from database," \
                 #+ " this looks fishy in here...")
-                    #print nodestring
-
                     nodeargs, tags = self.parse_node_string(nodestring)
-                    print "fg2"
-                    #node = cPickle.loads(nodestring)
-                    #import ipdb; ipdb.set_trace()
-
                     node = Node(**nodeargs)
                     node.set_tags(tags)
                     node.set_id(i)
                     nodes.append(node)
-                    print "n"
             #except sqlite.DatabaseError, e:
             #   raise DatabaseException("SQLite: %s" % (e))
         return nodes
 
     def editnode(self, id, node):
+        """
+        TODO: fix THIS  cPickle here ...
+        """
         #if not isinstance(node, Node): raise DatabaseException(
         #        "Tried to insert foreign object into database [%s]" % node)
         try:
@@ -229,7 +219,7 @@ class SQLiteDatabase(Database):
                     first = False
                 sql += ("SELECT NODE FROM LOOKUP LEFT JOIN TAGS ON TAG = "
                         " TAGS.ID WHERE TAGS.DATA = ? ")
-                params.append(cPickle.dumps(t))
+                params.append(t.get_name())
         try:
             self._cur.execute(sql, params)
             ids = []
@@ -255,17 +245,13 @@ class SQLiteDatabase(Database):
             sql = "SELECT ID FROM TAGS WHERE DATA = ?"
             #if not isinstance(t, Tag): raise DatabaseException(
             #    "Tried to insert foreign object into database [%s]", t)
-            #data = cPickle.dumps(t) # tag is data
-            import pdb; pdb.set_trace()
             try:
-                #self._cur.execute(sql, [tag])
                 self._cur.execute(sql, [tag.get_name()])
                 row = self._cur.fetchone()
                 if (row is not None):
                     ids.append(row[0])
                 else:
                     sql = "INSERT INTO TAGS(DATA) VALUES(?)"
-                    #self._cur.execute(sql, [tag])
                     self._cur.execute(sql, [tag.get_name()])
                     ids.append(self._cur.lastrowid)
             except sqlite.DatabaseError, e:
@@ -356,4 +342,3 @@ class SQLiteDatabase(Database):
             return None
         else:
             return keyrow[0]
-        print "succeded"

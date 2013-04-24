@@ -1,6 +1,7 @@
 #============================================================================
 
 
+
 # This file is part of Pwman3.
 #
 # Pwman3 is free software; you can redistribute it and/or modify
@@ -26,6 +27,7 @@ from pwman.util.crypto import CryptoEngine
 
 
 class Node:
+
     def __init__(self, username="", password="", url="", notes="", tags=[]):
         """Initialise everything to null."""
         self._id = 0
@@ -77,9 +79,15 @@ class Node:
         self._id = id
 
     def get_username(self):
-        """Return the username."""
+        """
+        Return the username.
+        This solution with strip is horribly assuming that
+        the username does not containg space as the last character.
+        The same is also true for the password.
+        """
+
         enc = CryptoEngine.get()
-        return enc.decrypt(self._username)
+        return enc.decrypt(self._username).strip()
 
     def set_username(self, username):
         """Set the username."""
@@ -89,17 +97,17 @@ class Node:
     def get_password(self):
         """Return the password."""
         enc = CryptoEngine.get()
-        return enc.decrypt(self._password)
+        return enc.decrypt(self._password).strip()
 
     def set_password(self, password):
         """Set the password."""
         enc = CryptoEngine.get()
-        self._password = enc.encrypt(password)
+        self._password = enc.encrypt(password).strip()
 
     def get_url(self):
         """Return the URL."""
         enc = CryptoEngine.get()
-        return enc.decrypt(self._url)
+        return enc.decrypt(self._url).strip()
 
     def set_url(self, url):
         """Set the URL."""
