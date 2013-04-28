@@ -486,8 +486,9 @@ class PwmanCli(cmd.Cmd):
                 if len(tagstring) > tagstring_len:
                     tagstring = tagstring[:tagstring_len-3] + "..."
                 fmt = "%%5d. %%-%ds %%-%ds" % (name_len, tagstring_len)
-                print typeset(fmt % (n.get_id(), name, tagstring),
+                formatted_entry = typeset(fmt % (n.get_id(), name, tagstring),
                               ANSI.Yellow, False)
+                print formatted_entry
                 i += 1
                 if i > rows-2:
                     i = 0
