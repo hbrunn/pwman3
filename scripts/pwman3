@@ -108,7 +108,7 @@ try:
     if args.dbase:
         config.set_value("Database", "filename", args.dbase)
         _saveconfig = False
-    if args.algo != "Blowfish":
+        if args.algo != "AES":
             config.set_value("Encryption", "algorithm", args.algo)
             _saveconfig = False
     # set umask before creating/opening any files
@@ -118,6 +118,14 @@ try:
     enc = CryptoEngine.get()
 
     dbtype = config.get_value("Database", "type")
+    # TODO: altenatively, db checking can be done here ...
+    # if it is done here, we could do the following:
+    # if db.ver == 0.4 :
+    #     db = pwman.data.factory.create(dbtyp, new_version)
+    # else:
+    #     we use the old code untouched ... insecure, but
+    #     keeps backwards compatibility ...
+
     db = pwman.data.factory.create(dbtype)
     cli = PwmanCli(db, xselpath)
 except SystemExit, e:
