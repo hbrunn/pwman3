@@ -1,6 +1,4 @@
 #============================================================================
-
-
 # This file is part of Pwman3.
 #
 # Pwman3 is free software; you can redistribute it and/or modify
@@ -289,7 +287,13 @@ class SQLiteDatabase(Database):
         self._commit()
 
     def _checktables(self):
-        """ Check if the Pwman tables exist """
+        """
+        Check if the Pwman tables exist.
+        TODO: This method should check the version of the
+        database. If it finds an old format it should
+        exis, and prompt the user to convert the database
+        to the new version with a designated script.
+        """
         self._cur.execute("PRAGMA TABLE_INFO(NODES)")
         if (self._cur.fetchone() is None):
             # table doesn't exist, create it
