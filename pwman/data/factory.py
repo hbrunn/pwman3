@@ -45,7 +45,7 @@ def check_db_version(type):
 
 
 
-def create(type):
+def create(type, version=None):
     """
     create(params) -> Database
     Create a Database instance.
@@ -54,20 +54,27 @@ def create(type):
 
     if type == "BerkeleyDB":
         pass
-#        db = BerkeleyDatabase.BerkeleyDatabase(params)
-    elif (type == "SQLite"):
+#       db = BerkeleyDatabase.BerkeleyDatabase(params)
+    elif type == "SQLite":
+        # TODO: rename  sqlite.SQLiteDatabase to
+        #       SQLiteDatabaseaNewForm
+        #       copy old SQLiteDatabase from the master
+        #       branch and paste it to the module ...
         try:
             from pwman.data.drivers import sqlite
-            db = sqlite.SQLiteDatabase()
+            if version == 0.4:
+                db = sqlite.SQLiteDatabaseNewForm()
+            else:
+                db = sqlite.SQLiteDatabase()
         except ImportError, e:
             raise DatabaseException("python-sqlite not installed")
-    elif (type == "Postgresql"):
+    elif type == "Postgresql":
         try:
             from pwman.data.drivers import postgresql
             db = postgresql.PostgresqlDatabase()
         except ImportError, e:
             raise DatabaseException("python-pygresql not installed")
-    elif (type == "MySQL"):
+    elif type == "MySQL":
         try:
             from pwman.data.drivers import mysql
             db = mysql.MySQLDatabase()
