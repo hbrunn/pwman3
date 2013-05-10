@@ -62,7 +62,7 @@ def check_db_version():
     except sqlite.DatabaseError, e:
         raise DatabaseException("SQLite: %s" % (e))
 
-class SQLiteDatabase(Database):
+class SQLiteDatabaseNewForm(Database):
     """SQLite Database implementation"""
 
     def __init__(self):
