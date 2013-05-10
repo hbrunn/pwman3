@@ -1,15 +1,14 @@
 #============================================================================
 # This file is part of Pwman3.
-# 
 # Pwman3 is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License, version 2
-# as published by the Free Software Foundation; 
-# 
+# as published by the Free Software Foundation;
+#
 # Pwman3 is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Pwman3; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -34,10 +33,22 @@ from pwman.data.database import Database, DatabaseException
 
 import pwman.util.config as config
 
+def check_db_version(type):
+    if type == "SQLite":
+        try:
+            from pwman.data.drivers import sqlite
+        except ImportError, e:
+            raise DatabaseException("python-sqlite not installed")
+        ver = sqlite.check_db_version()
+        return ver
+     # TODO: implement version checks for other supported DBs.
+
+
+
 def create(type):
     """
     create(params) -> Database
-    Create a Database instance. 
+    Create a Database instance.
     'type' can only be 'SQLite' at the moment
     """
 
@@ -45,7 +56,7 @@ def create(type):
         pass
 #        db = BerkeleyDatabase.BerkeleyDatabase(params)
     elif (type == "SQLite"):
-        try: 
+        try:
             from pwman.data.drivers import sqlite
             db = sqlite.SQLiteDatabase()
         except ImportError, e:

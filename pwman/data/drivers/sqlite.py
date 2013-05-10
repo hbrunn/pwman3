@@ -1,4 +1,5 @@
 #============================================================================
+
 # This file is part of Pwman3.
 #
 # Pwman3 is free software; you can redistribute it and/or modify
@@ -38,6 +39,28 @@ import pwman.util.config as config
 
 #import cPickle
 
+
+def check_db_version():
+    """
+    check the data base version query the right table
+    """
+    try:
+        filename=config.get_value('Database', 'filename')
+        con = sqlite.connect(filename)
+        cur = con.cursor()
+        cur.execute("PRAGMA TABLE_INFO(DBVERSION)")
+        row = cur.fetchone()
+        if row is None:
+            return None
+        try:
+            return row[-2]
+        except IndexError:
+            raise DatabaseException("Something seems fishy with the DB")
+
+
+
+    except sqlite.DatabaseError, e:
+        raise DatabaseException("SQLite: %s" % (e))
 
 class SQLiteDatabase(Database):
     """SQLite Database implementation"""
@@ -311,6 +334,10 @@ class SQLiteDatabase(Database):
             self._cur.execute("CREATE TABLE KEY"
                               + "(THEKEY TEXT NOT NULL DEFAULT '')")
             self._cur.execute("INSERT INTO KEY VALUES('')")
+            # create a table to hold DB version info
+            self._cur.execute("CREATE TABLE DBVERSION"
+                             + "(DBVERSION TEXT NOT NULL DEFAULT '0.4')")
+            self._cur.execute("INSERT INTO DBVERSION VALUES('0.4')")
             try:
                 self._con.commit()
             except DatabaseException, e:

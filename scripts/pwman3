@@ -118,14 +118,20 @@ try:
     enc = CryptoEngine.get()
 
     dbtype = config.get_value("Database", "type")
-    # TODO: altenatively, db checking can be done here ...
     # if it is done here, we could do the following:
     # if db.ver == 0.4 :
     #     db = pwman.data.factory.create(dbtyp, new_version)
     # else:
     #     we use the old code untouched ... insecure, but
     #     keeps backwards compatibility ...
-
+    dbver = pwman.data.factory.check_db_version(dbtype)
+    # the method create could create an old instance that
+    # accepts cPickle object or new style instance that
+    # accepts only strings.
+    # The user should be STRONGLY Prompted to CONVERT the
+    # database to the new format using a command line tool.
+    # version 0.5 pwman will depreciate that old and insecure
+    # code ...
     db = pwman.data.factory.create(dbtype)
     cli = PwmanCli(db, xselpath)
 except SystemExit, e:
