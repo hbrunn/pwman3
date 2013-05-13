@@ -57,12 +57,14 @@ try:
 except ImportError, e:
     _readline_available = False
 
+
 class CLICallback(Callback):
     def getinput(self, question):
         return raw_input(question)
 
     def getsecret(self, question):
         return getpass.getpass(question + ":")
+
 
 class ANSI(object):
     Reset = 0
@@ -77,6 +79,7 @@ class ANSI(object):
     Magenta = 35
     Cyan = 36
     White = 37
+
 
 class PwmanCli(cmd.Cmd):
     def error(self, exception):
@@ -104,7 +107,7 @@ class PwmanCli(cmd.Cmd):
         idstrs = args.split()
         for i in idstrs:
             m = rex.match(i)
-            if m == None:
+            if m is None:
                 try:
                     ids.append(int(i))
                 except ValueError:
@@ -122,8 +125,8 @@ class PwmanCli(cmd.Cmd):
     def get_username(self, default=""):
         return getinput("Username: ", default)
 
-    def get_password(self, argsgiven, numerics=False,leetify=False, symbols=False,
-                     special_signs=False):
+    def get_password(self, argsgiven, numerics=False, leetify=False,
+                     symbols=False, special_signs=False):
         """
         in the config file:
         numerics -> numerics
@@ -133,18 +136,27 @@ class PwmanCli(cmd.Cmd):
         if argsgiven == 1:
             length = getinput("Password length (default 7): ", "7")
             length = int(length)
-            (password, dumpme) = generator.generate_password(length, length, \
-                True, leetify, numerics, special_signs)
+            password, dumpme = generator.generate_password(length,
+                                                           length,
+                                                           True, leetify,
+                                                           numerics,
+                                                           special_signs)
             print "New password: %s" % (password)
             return password
         # no args given
-        password = getpassword("Password (Blank to generate): ", _defaultwidth, \
-            False)
+        password = getpassword("Password (Blank to generate): ",
+                               _defaultwidth, False)
         if len(password) == 0:
             length = getinput("Password length (default 7): ", "7")
             length = int(length)
-            (password, dumpme) = generator.generate_password(length, length, \
-                True, leetify, numerics, special_signs)
+            password, dumpme = generator.generate_password(length,
+                                                           length,
+                                                           True,
+                                                           leetify,
+                                                           numerics,
+                                                           special_signs
+                                                           )
+
             print "New password: %s" % (password)
         return password
 
@@ -242,14 +254,13 @@ class PwmanCli(cmd.Cmd):
     def do_tags(self, arg):
         tags = self._db.listtags()
         if len(tags) > 0:
-            tags[0].get_name() # hack to get password request before output
+            tags[0].get_name()  # hack to get password request before output
         print "Tags: ",
         if len(tags) == 0:
             print "None",
         for t in tags:
             print "%s " % (t.get_name()),
         print
-
 
     def complete_filter(self, text, line, begidx, endidx):
         strings = []
@@ -263,7 +274,6 @@ class PwmanCli(cmd.Cmd):
             if name.startswith(text):
                 strings.append(t.get_name())
         return strings
-
 
     def do_filter(self, args):
         tagstrings = args.split()
@@ -321,7 +331,6 @@ class PwmanCli(cmd.Cmd):
                 self._db.editnode(i, node)
             except Exception, e:
                 self.error(e)
-
 
     def do_import(self, arg):
         try:
@@ -385,8 +394,8 @@ class PwmanCli(cmd.Cmd):
         Password (Blank to generate):
         """
         errmsg = """could not parse config override, please input some"""\
-                 +""" kind of dictionary, e.g.: n {'leetify':False, """\
-                 +"""'numerics':True, 'special_chars':True}"""
+                 + """ kind of dictionary, e.g.: n {'leetify':False, """\
+                 + """'numerics':True, 'special_chars':True}"""
         try:
             username = self.get_username()
             if args:
@@ -398,10 +407,13 @@ class PwmanCli(cmd.Cmd):
                     raise Exception(errmsg)
                 password = self.get_password(1, **args)
             else:
-                numerics = config.get_value("Generator", "numerics").lower() == 'true'
+                numerics = config.get_value("Generator",
+                                            "numerics").lower() == 'true'
                 # TODO: allow custom leetifying through the config
-                leetify = config.get_value("Generator", "leetify").lower() == 'true'
-                special_chars = config.get_value("Generator", "special_chars").lower() == 'true'
+                leetify = config.get_value("Generator",
+                                           "leetify").lower() == 'true'
+                special_chars = config.get_value("Generator",
+                                                 "special_chars").lower() == 'true'
                 password = self.get_password(0,
                                              numerics=numerics,
                                              symbols=leetify,
@@ -438,8 +450,8 @@ class PwmanCli(cmd.Cmd):
             nodes = self._db.getnodes(ids)
             for n in nodes:
                 b = getyesno("Are you sure you want to delete '%s@%s'?"
-                              % (n.get_username(), n.get_url()), False)
-                if b == True:
+                             % (n.get_username(), n.get_url()), False)
+                if b is True:
                     self._db.removenodes([n])
                     print "%s@%s deleted" % (n.get_username(), n.get_url())
         except Exception, e:
@@ -460,7 +472,7 @@ class PwmanCli(cmd.Cmd):
             if sys.platform != 'win32':
                 rows, cols = gettermsize()
             else:
-                rows, cols = 18, 80 # fix this !
+                rows, cols = 18, 80  # fix this !
             nodeids = self._db.listnodes()
             nodes = self._db.getnodes(nodeids)
             cols -= 8
@@ -487,7 +499,7 @@ class PwmanCli(cmd.Cmd):
                     tagstring = tagstring[:tagstring_len-3] + "..."
                 fmt = "%%5d. %%-%ds %%-%ds" % (name_len, tagstring_len)
                 formatted_entry = typeset(fmt % (n.get_id(), name, tagstring),
-                              ANSI.Yellow, False)
+                                          ANSI.Yellow, False)
                 print formatted_entry
                 i += 1
                 if i > rows-2:
@@ -568,8 +580,9 @@ class PwmanCli(cmd.Cmd):
             try:
                 node = self._db.getnodes(ids)
                 text_to_clipboards(node[0].get_password())
-                print "copied password for %s@%s clipboard... erasing in 10 sec..." % \
-                (node[0].get_username(), node[0].get_url())
+                print "copied password for %s@%s clipboard..." \
+                      + " erasing in 10 sec..." % (node[0].get_username(),
+                                                   node[0].get_url())
                 time.sleep(10)
                 text_to_clipboards("")
             except Exception, e:
@@ -597,6 +610,7 @@ class PwmanCli(cmd.Cmd):
     ##
     ## Help functions
     ##
+
     def usage(self, string):
         print "Usage: %s" % (string)
 
@@ -691,7 +705,11 @@ pwman> n {'leetify':False, 'numerics':True}"""
 
     def help_set(self):
         self.usage("set [configoption] [value]")
-        print "Sets a configuration option. If no value is specified, the current value for [configoption] is output. If neither [configoption] nor [value] are specified, the whole current configuration is output. [configoption] must be of the format <section>.<option>"
+        print "Sets a configuration option. If no value is specified, the " \
+              + "current value for [configoption] is output. If neither "\
+              + "[configoption] nor [value] are specified, the whole current" \
+              + "configuration is output. [configoption] must be of the " \
+              + "format <section>.<option>"
 
     def help_passwd(self):
         self.usage("passwd")
@@ -699,7 +717,8 @@ pwman> n {'leetify':False, 'numerics':True}"""
 
     def help_forget(self):
         self.usage("forget")
-        print "Forgets the database password. Your password will need to be reentered before accessing the database again."
+        print "Forgets the database password. Your password will need to be" \
+              + " reentered before accessing the database again."
 
     def help_clear(self):
         self.usage("clear")
@@ -707,7 +726,8 @@ pwman> n {'leetify':False, 'numerics':True}"""
 
     def help_filter(self):
         self.usage("filter <tag> ...")
-        print "Filters nodes on tag. Arguments can be zero or more tags. Displays current tags if called without arguments."
+        print "Filters nodes on tag. Arguments can be zero or more tags." \
+              + "Displays current tags if called without arguments."
 
     def help_tags(self):
         self.usage("tags")
@@ -726,7 +746,7 @@ pwman> n {'leetify':False, 'numerics':True}"""
         """
         cmd.Cmd.__init__(self)
         self.intro = "%s %s (c) visit: %s" % (pwman.appname, pwman.version,
-                                            pwman.website)
+                                              pwman.website)
         self._historyfile = config.get_value("Readline", "history")
         self.hasxsel = hasxsel
         try:
@@ -746,6 +766,15 @@ pwman> n {'leetify':False, 'numerics':True}"""
         self.prompt = "pwman> "
 
 
+class PwmanCliNew(PwmanCli):
+    """
+    inherit from the old class, override
+    all the methods related to tags, and
+    newer Node format, so backward compatability is kept...
+    """
+    #TODO: move all modified methods to this class and
+    # keep all untouced code in the old class
+
 
 class PwmanCliMac(PwmanCli):
     """
@@ -759,8 +788,9 @@ class PwmanCliMac(PwmanCli):
             node = self._db.getnodes(ids)
             node[0].get_password()
             text_to_mcclipboard(node[0].get_password())
-            print "copied password for %s@%s clipboard... erasing in 10 sec..." % \
-            (node[0].get_username(), node[0].get_url())
+            print "copied password for %s@%s clipboard..." \
+                  + "erasing in 10 sec..." % \
+                  (node[0].get_username(), node[0].get_url())
             time.sleep(10)
             text_to_clipboards("")
         except Exception, e:
@@ -804,6 +834,7 @@ the url must contain http:// or https://."
 
 _defaultwidth = 10
 
+
 def getonechar(question, width=_defaultwidth):
     question = "%s " % (question)
     print question.ljust(width),
@@ -818,6 +849,7 @@ def getonechar(question, width=_defaultwidth):
         tty.tcsetattr(fd, tty.TCSAFLUSH, tty_mode)
     print ch
     return ch
+
 
 def getyesno(question, defaultyes=False, width=_defaultwidth):
     if (defaultyes):
@@ -837,12 +869,14 @@ def getyesno(question, defaultyes=False, width=_defaultwidth):
     else:
         return getyesno(question, defaultyes, width)
 
+
 def gettermsize():
     s = struct.pack("HHHH", 0, 0, 0, 0)
     f = sys.stdout.fileno()
     x = fcntl.ioctl(f, termios.TIOCGWINSZ, s)
     rows, cols, width, height = struct.unpack("HHHH", x)
     return rows, cols
+
 
 def getinput(question, default="", completer=None, width=_defaultwidth):
     if (not _readline_available):
@@ -861,6 +895,7 @@ def getinput(question, default="", completer=None, width=_defaultwidth):
         readline.set_completer(oldcompleter)
         readline.set_startup_hook()
         return x
+
 
 def getpassword(question, width=_defaultwidth, echo=False):
     if echo:
@@ -892,6 +927,7 @@ def typeset(text, color, bold=False, underline=False):
     return "\033[%s%s%sm%s\033[%sm" % (bold, underline, color,
                                        text, ANSI.Reset)
 
+
 def select(question, possible):
     for i in range(0, len(possible)):
         print ("%d - %-"+str(_defaultwidth)+"s") % (i+1, possible[i])
@@ -899,6 +935,7 @@ def select(question, possible):
         uinput = getonechar(question)
         if uinput.isdigit() and int(uinput) in range(1, len(possible)+1):
             return possible[int(uinput)-1]
+
 
 def text_to_clipboards(text):
     """
@@ -980,7 +1017,7 @@ class CliMenu(object):
                 # previous value as a parameter
                 # TODO: enable overriding password policy as if new node
                 # is created.
-                if selection == 1: # for password
+                if selection == 1:  # for password
                     value = self.items[selection].editor(0)
                 else:
                     value = self.items[selection].editor(self.items[selection].getter())
@@ -990,6 +1027,7 @@ class CliMenu(object):
                 if (option.upper() == 'X'):
                     break
                 print "Invalid selection"
+
 
 class CliMenuItem(object):
     def __init__(self, name, editor, getter, setter):
