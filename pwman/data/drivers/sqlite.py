@@ -45,7 +45,7 @@ def check_db_version():
     check the data base version query the right table
     """
     try:
-        filename=config.get_value('Database', 'filename')
+        filename = config.get_value('Database', 'filename')
         con = sqlite.connect(filename)
         cur = con.cursor()
         cur.execute("PRAGMA TABLE_INFO(DBVERSION)")
@@ -57,10 +57,9 @@ def check_db_version():
         except IndexError:
             raise DatabaseException("Something seems fishy with the DB")
 
-
-
     except sqlite.DatabaseError, e:
         raise DatabaseException("SQLite: %s" % (e))
+
 
 class SQLiteDatabaseNewForm(Database):
     """SQLite Database implementation"""
@@ -143,9 +142,9 @@ class SQLiteDatabaseNewForm(Database):
         tags = tags.split("tag:")
         taginsts = []
         for tag in tags:
-           _Tag = tag.rstrip("**endtag**")
-           Tag = (_Tag)
-           taginsts.append(Tag)
+            _Tag = tag.rstrip("**endtag**")
+            Tag = (_Tag)
+            taginsts.append(Tag)
         return keyvals, taginsts
 
     def getnodes(self, ids):
@@ -174,15 +173,9 @@ class SQLiteDatabaseNewForm(Database):
         return nodes
 
     def editnode(self, id, node):
-        """
-        TODO: fix THIS  cPickle here ...
-        """
-        #if not isinstance(node, Node): raise DatabaseException(
-        #        "Tried to insert foreign object into database [%s]" % node)
         try:
             sql = "UPDATE NODES SET DATA = ? WHERE ID = ?"
-            self._cur.execute(sql, [cPickle.dumps(node), id])
-
+            self._cur.execute(sql, [node.dump_edit_to_db()[0], id])
         except sqlite.DatabaseError, e:
             raise DatabaseException("SQLite: %s" % (e))
         self._setnodetags(node)
@@ -267,13 +260,20 @@ class SQLiteDatabaseNewForm(Database):
             #if not isinstance(t, Tag): raise DatabaseException(
             #    "Tried to insert foreign object into database [%s]", t)
             try:
-                self._cur.execute(sql, [tag.get_name()])
+                if isinstance(tag , str):
+                    self._cur.execute(sql, [tag])
+                else:
+                    self._cur.execute(sql, [tag.get_name()])
                 row = self._cur.fetchone()
                 if (row is not None):
                     ids.append(row[0])
                 else:
                     sql = "INSERT INTO TAGS(DATA) VALUES(?)"
-                    self._cur.execute(sql, [tag.get_name()])
+                    if isinstance(tag , str):
+                        self._cur.execute(sql, [tag])
+                    else:
+                        self._cur.execute(sql, [tag.get_name()])
+    
                     ids.append(self._cur.lastrowid)
             except sqlite.DatabaseError, e:
                 raise DatabaseException("SQLite: %s" % (e))
@@ -302,7 +302,7 @@ class SQLiteDatabaseNewForm(Database):
 
     def _checktags(self):
         try:
-            sql = "DELETE FROM TAGS WHERE ID NOT IN (SELECT TAG FROM"
+            sql = "DELETE FROM TAGS WHERE ID NOT IN (SELECT TAG FROM" \
             + " LOOKUP GROUP BY TAG)"
             self._cur.execute(sql)
         except sqlite.DatabaseError, e:
@@ -336,7 +336,7 @@ class SQLiteDatabaseNewForm(Database):
             self._cur.execute("INSERT INTO KEY VALUES('')")
             # create a table to hold DB version info
             self._cur.execute("CREATE TABLE DBVERSION"
-                             + "(DBVERSION TEXT NOT NULL DEFAULT '0.4')")
+                              + "(DBVERSION TEXT NOT NULL DEFAULT '0.4')")
             self._cur.execute("INSERT INTO DBVERSION VALUES('0.4')")
             try:
                 self._con.commit()

@@ -38,6 +38,25 @@ class Node:
         self._tags = []
         self.set_tags(tags)
 
+
+    def dump_edit_to_db(self):
+        enc = CryptoEngine.get()
+        dump = ""
+        dump += "username:"+self._username+"##"
+        dump += "password:"+self._password+"##"
+        dump += "url:"+self._url+"##"
+        dump += "notes:"+self._notes+"##"
+        dump += "tags:"
+        tagsloc=""
+        for tag in self._tags:
+            if isinstance(tag , str):
+                tagsloc += "tag:"+tag.strip()+"**endtag**"
+            else:
+                tagsloc += "tag:"+tag.get_name()+"**endtag**"
+        dump += tagsloc
+        dump = [dump]
+        return dump
+
     def dump_to_db(self):
         enc = CryptoEngine.get()
         dump = ""
@@ -48,7 +67,10 @@ class Node:
         dump += "tags:"
         tagsloc=""
         for tag in self._tags:
-            tagsloc += "tag:"+tag.get_name()+"**endtag**"
+            if isinstance(tag , str):
+                tagsloc += "tag:"+tag.strip()+"**endtag**"
+            else:
+                tagsloc += "tag:"+tag.get_name()+"**endtag**"
         dump += tagsloc
         dump = [dump]
         return dump
