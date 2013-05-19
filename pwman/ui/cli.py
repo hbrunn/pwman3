@@ -853,7 +853,6 @@ class PwmanCliNew(PwmanCli):
                         tagstring += ", "
                     else:
                         first = False
-                    # tagstring += t.get_name()
                     tagstring += t
 
                 name = "%s@%s" % (n.get_username(), n.get_url())
