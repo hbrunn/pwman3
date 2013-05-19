@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 #============================================================================
 # This file is part of Pwman3.
 #
@@ -51,9 +52,11 @@ from pwman.util.crypto import CryptoEngine
 
 if 'darwin' in sys.platform:
     from pwman.ui.cli import PwmanCliMac as PwmanCli
+    from pwman.ui.cli import PwmanCliMacNew as PwmanCliNew
     OSX = True
 else:
     from pwman.ui.cli import PwmanCli
+    from pwman.ui.cli import PwmanCliNew
     OSX = False
 
 
@@ -137,7 +140,10 @@ try:
     # version 0.5 pwman will depreciate that old and insecure
     # code ...
     db = pwman.data.factory.create(dbtype, dbver)
-    cli = PwmanCli(db, xselpath)
+    if dbver >= 0.4:
+        cli = PwmanCliNew(db, xselpath)
+    elif dbver < 0.4:
+        cli = PwmanCli(db, xselpath)
 except SystemExit, e:
     sys.exit(e)
 except Exception, e:
