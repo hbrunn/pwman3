@@ -1,4 +1,5 @@
 #============================================================================
+
 # This file is part of Pwman3.
 #
 # Pwman3 is free software; you can redistribute it and/or modify
@@ -40,7 +41,7 @@ import os
 import struct
 import getpass
 import cmd
-#import traceback
+# import traceback
 import time
 import select as uselect
 import subprocess as sp
@@ -94,10 +95,10 @@ class PwmanCli(cmd.Cmd):
 
     def do_exit(self, args):
         print
-        #try:
+        # try:
         #    print "goodbye"
         self._db.close()
-        #except DatabaseException, e:
+        # except DatabaseException, e:
         #    self.error(e)
         return True
 
@@ -195,8 +196,7 @@ class PwmanCli(cmd.Cmd):
         tagstrings = taglist.split()
         tags = []
         for tn in tagstrings:
-            _Tag = Tag(tn)
-            tags.append(_Tag)
+            tags.append(Tag(tn))
         return tags
 
     def print_node(self, node):
@@ -212,8 +212,7 @@ class PwmanCli(cmd.Cmd):
                                     node.get_notes())
         print typeset("Tags: ", ANSI.Red),
         for t in node.get_tags():
-            #print " %s " % t.get_name(),
-            print " %s " % t,
+            print " %s " % t.get_name()
         print
 
         def heardEnter():
@@ -276,6 +275,8 @@ class PwmanCli(cmd.Cmd):
         return strings
 
     def do_filter(self, args):
+        """
+        """
         tagstrings = args.split()
 
         try:
@@ -351,6 +352,10 @@ class PwmanCli(cmd.Cmd):
             self.error(e)
 
     def do_export(self, arg):
+        """
+        TODO: this methods is probably broken because of
+        new DB format..
+        """
         try:
             nodes = self.get_ids(arg)
 
@@ -413,7 +418,8 @@ class PwmanCli(cmd.Cmd):
                 leetify = config.get_value("Generator",
                                            "leetify").lower() == 'true'
                 special_chars = config.get_value("Generator",
-                                                 "special_chars").lower() == 'true'
+                                                 "special_chars").lower() \
+                    == 'true'
                 password = self.get_password(0,
                                              numerics=numerics,
                                              symbols=leetify,
@@ -486,9 +492,7 @@ class PwmanCli(cmd.Cmd):
                         tagstring += ", "
                     else:
                         first = False
-                    #tagstring += t.get_name()
-                    tagstring += t
-
+                    tagstring += t.get_name()
                 name = "%s@%s" % (n.get_username(), n.get_url())
 
                 name_len = cols * 2 / 3
@@ -513,7 +517,7 @@ class PwmanCli(cmd.Cmd):
 
     def do_forget(self, args):
         """
-        earase key from memory to close the DB.
+        erase key from memory to close the DB.
         """
         try:
             enc = CryptoEngine.get()
@@ -635,7 +639,8 @@ the url must contain http:// or https://."
 
     def help_list(self):
         self.usage("list <tag> ...")
-        print "List nodes that match current or specified filter. ls is an alias."
+        print "List nodes that match current or specified filter. "
+        + "ls is an alias."
 
     def help_EOF(self):
         self.help_exit()
@@ -675,7 +680,9 @@ the url must contain http:// or https://."
 
     def help_export(self):
         self.usage("export <ID|tag> ... ")
-        print "Exports a list of ids to an external format. If no IDs or tags are specified, then all nodes under the current filter are exported."
+        print "Exports a list of ids to an external format. "
+        + "If no IDs or tags are specified, then all nodes "
+        + "under the current filter are exported."
         self._mult_id_help()
 
     def help_new(self):
@@ -693,7 +700,12 @@ pwman> n {'leetify':False, 'numerics':True}"""
         self._mult_id_help()
 
     def _mult_id_help(self):
-        print "Multiple ids and nodes can be specified, separated by a space. A range of ids can be specified in the format n-N. e.g. '10-20' would specify all nodes having ids from 10 to 20 inclusive. Tags are considered one-by-one. e.g. 'foo 2 bar' would yield to all nodes with tag 'foo', node 2 and all nodes with tag 'bar'."
+        print "Multiple ids and nodes can be specified, separated by a space."
+        + " A range of ids can be specified in the format n-N."
+        + " e.g. '10-20' would specify all nodes having IDs from 10 to 20"
+        + " inclusive. Tags are considered one-by-one. e.g. 'foo 2 bar'"
+        + " would yield to all nodes with tag 'foo', node 2 and all nodes with"
+        + " tag 'bar'."
 
     def help_exit(self):
         self.usage("exit")
@@ -701,7 +713,9 @@ pwman> n {'leetify':False, 'numerics':True}"""
 
     def help_save(self):
         self.usage("save [filename]")
-        print "Saves the current configuration to [filename]. If no filename is given, the configuration is saved to the file from which the initial configuration was loaded."
+        print "Saves the current configuration to [filename]. "
+        + "If no filename is given, the configuration is saved to "
+        + "the file from which the initial configuration was loaded."
 
     def help_set(self):
         self.usage("set [configoption] [value]")
@@ -772,14 +786,154 @@ class PwmanCliNew(PwmanCli):
     all the methods related to tags, and
     newer Node format, so backward compatability is kept...
     """
-    #TODO: move all modified methods to this class and
-    # keep all untouced code in the old class
+    def do_tags(self, arg):
+        tags = self._db.listtags()
+        if len(tags) > 0:
+            tags[0].get_name()  # hack to get password request before output
+        print "Tags: ",
+        if len(tags) == 0:
+            print "None",
+        for t in tags:
+            print "%s " % (t.get_name()),
+        print
+
+    def get_tags(self, default=None):
+        defaultstr = ''
+
+        if default:
+            for t in default:
+                defaultstr += "%s " % (t.get_name())
+        else:
+            tags = self._db.currenttags()
+            for t in tags:
+                defaultstr += "%s " % (t.get_name())
+
+        strings = []
+        tags = self._db.listtags(True)
+        for t in tags:
+            strings.append(t.get_name())
+
+        def complete(text, state):
+            count = 0
+            for s in strings:
+                if s.startswith(text):
+                    if count == state:
+                        return s
+                    else:
+                        count += 1
+
+        taglist = getinput("Tags: ", defaultstr, complete)
+        tagstrings = taglist.split()
+        tags = []
+        for tn in tagstrings:
+            _Tag = Tag(tn)
+            tags.append(_Tag)
+        return tags
+
+    def do_list(self, args):
+
+        if len(args.split()) > 0:
+            self.do_clear('')
+            self.do_filter(args)
+        try:
+            if sys.platform != 'win32':
+                rows, cols = gettermsize()
+            else:
+                rows, cols = 18, 80  # fix this !
+            nodeids = self._db.listnodes()
+            nodes = self._db.getnodes(nodeids)
+            cols -= 8
+            i = 0
+            for n in nodes:
+                tags = n.get_tags()
+                tagstring = ''
+                first = True
+                for t in tags:
+                    if not first:
+                        tagstring += ", "
+                    else:
+                        first = False
+                    # tagstring += t.get_name()
+                    tagstring += t
+
+                name = "%s@%s" % (n.get_username(), n.get_url())
+
+                name_len = cols * 2 / 3
+                tagstring_len = cols / 3
+                if len(name) > name_len:
+                    name = name[:name_len-3] + "..."
+                if len(tagstring) > tagstring_len:
+                    tagstring = tagstring[:tagstring_len-3] + "..."
+                fmt = "%%5d. %%-%ds %%-%ds" % (name_len, tagstring_len)
+                formatted_entry = typeset(fmt % (n.get_id(), name, tagstring),
+                                          ANSI.Yellow, False)
+                print formatted_entry
+                i += 1
+                if i > rows-2:
+                    i = 0
+                    c = getonechar("Press <Space> for more, or 'Q' to cancel")
+                    if c == 'q':
+                        break
+
+        except Exception, e:
+            self.error(e)
 
 
 class PwmanCliMac(PwmanCli):
     """
     inherit from PwmanCli, override the right functions...
     """
+    def print_node(self, node):
+        width = str(_defaultwidth)
+        print "Node %d." % (node.get_id())
+        print ("%"+width+"s %s") % (typeset("Username:", ANSI.Red),
+                                    node.get_username())
+        print ("%"+width+"s %s") % (typeset("Password:", ANSI.Red),
+                                    node.get_password())
+        print ("%"+width+"s %s") % (typeset("Url:", ANSI.Red),
+                                    node.get_url())
+        print ("%"+width+"s %s") % (typeset("Notes:", ANSI.Red),
+                                    node.get_notes())
+        print typeset("Tags: ", ANSI.Red),
+        for t in node.get_tags():
+            print " %s  " % t
+        print
+
+        def heardEnter():
+            i, o, e = uselect.select([sys.stdin], [], [], 0.0001)
+            for s in i:
+                if s == sys.stdin:
+                    sys.stdin.readline()
+                    return True
+                return False
+
+        def heardEnterWin():
+            import msvcrt
+            c = msvcrt.kbhit()
+            if c == 1:
+                ret = msvcrt.getch()
+                if ret is not None:
+                    return True
+            return False
+
+        def waituntil_enter(somepredicate, timeout, period=0.25):
+            mustend = time.time() + timeout
+            while time.time() < mustend:
+                cond = somepredicate()
+                if cond:
+                    break
+                time.sleep(period)
+            self.do_cls('')
+
+        flushtimeout = int(config.get_value("Global", "cls_timeout"))
+        if flushtimeout > 0:
+            if sys.platform != 'win32':
+                print "Type Enter to flush screen (autoflash in 5 sec.)"
+                waituntil_enter(heardEnter, flushtimeout)
+            else:
+                print "Press any key to flush screen (autoflash in 5 sec.)"
+                waituntil_enter(heardEnterWin, flushtimeout)
+
     def do_copy(self, args):
         ids = self.get_ids(args)
         if len(ids) > 1:
@@ -832,6 +986,62 @@ the url must contain http:// or https://."
     def help_cp(self):
         self.help_copy()
 
+
+class PwmanCliMacNew(PwmanCliNew):
+    """
+    inherit from PwmanCliNew, override the right functions...
+    """
+    def do_copy(self, args):
+        ids = self.get_ids(args)
+        if len(ids) > 1:
+            print "Can only 1 password at a time..."
+        try:
+            node = self._db.getnodes(ids)
+            node[0].get_password()
+            text_to_mcclipboard(node[0].get_password())
+            print "copied password for %s@%s clipboard..." \
+                  + "erasing in 10 sec..." % \
+                  (node[0].get_username(), node[0].get_url())
+            time.sleep(10)
+            text_to_clipboards("")
+        except Exception, e:
+            self.error(e)
+
+    def do_cp(self, args):
+        self.do_copy(args)
+
+    def do_open(self, args):
+        ids = self.get_ids(args)
+        if len(ids) > 1:
+            print "Can open only 1 link at a time ..."
+            return None
+        try:
+            node = self._db.getnodes(ids)
+            url = node[0].get_url()
+            open_url(url, macosx=True)
+        except Exception, e:
+            self.error(e)
+
+    def do_o(self, args):
+        self.do_open(args)
+
+    ##
+    ## Help functions
+    ##
+    def help_open(self):
+        self.usage("open <ID>")
+        print "Launch default browser with 'open url',\n\
+the url must contain http:// or https://."
+
+    def help_o(self):
+        self.help_open()
+
+    def help_copy(self):
+        self.usage("copy <ID>")
+        print "Copy password to Cocoa clipboard using pbcopy)"
+
+    def help_cp(self):
+        self.help_copy()
 _defaultwidth = 10
 
 
@@ -1020,7 +1230,8 @@ class CliMenu(object):
                 if selection == 1:  # for password
                     value = self.items[selection].editor(0)
                 else:
-                    value = self.items[selection].editor(self.items[selection].getter())
+                    value = self.items[selection].editor(
+                        self.items[selection].getter())
 
                 self.items[selection].setter(value)
             except (ValueError, IndexError):
